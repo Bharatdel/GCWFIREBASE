@@ -138,7 +138,7 @@
         resultHtml += `<p><span class="subject">${sub}:</span> Section ${sec}</p>`;
       }
 
-      db.ref("timetable").once("value").then(snapshot => {
+      db.ref("StudentSubjectMapping").once("value").then(snapshot => {
         const entries = snapshot.val();
         const filtered = Object.values(entries).filter(entry => {
           return entry.Class === student.sem && subjects[entry.Subject] === entry.Section;
