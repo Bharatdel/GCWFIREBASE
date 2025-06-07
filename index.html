@@ -84,14 +84,14 @@
 <script src="https://www.gstatic.com/firebasejs/9.22.1/firebase-database-compat.js"></script>
 <script>
   const firebaseConfig = {
-  apiKey: "AIzaSyADLVaqtkhn7NIoe5RvI7senlx_3EI_DbU",
-  authDomain: "studentsubjectmapping.firebaseapp.com",
-  databaseURL: "https://studentsubjectmapping-default-rtdb.firebaseio.com",
-  projectId: "studentsubjectmapping",
-  storageBucket: "studentsubjectmapping.firebasestorage.app",
-  messagingSenderId: "2404749289",
-  appId: "1:2404749289:web:3a68a3e3d0889e5e468578"
-};
+    apiKey: "AIzaSyADLVaqtkhn7NIoe5RvI7senlx_3EI_DbU",
+    authDomain: "studentsubjectmapping.firebaseapp.com",
+    databaseURL: "https://studentsubjectmapping-default-rtdb.firebaseio.com",
+    projectId: "studentsubjectmapping",
+    storageBucket: "studentsubjectmapping.firebasestorage.app",
+    messagingSenderId: "2404749289",
+    appId: "1:2404749289:web:3a68a3e3d0889e5e468578"
+  };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.database();
 </script>
@@ -100,7 +100,7 @@
 <div class="container">
   <h1><img src="logo.jpg" alt="Icon" style="height: 40px; vertical-align: middle;"> &nbsp;GCW KARNAL</h1><hr>
   <h2 align=center>Know Your Subject-Section here</h2>
-  
+
   <form id="rollForm">
     <label for="rollno">Enter Your Complete Roll Number:</label>
     <input type="text" id="rollno" name="rollno" required pattern="\d+" title="Please enter a valid roll number (digits only)" />
@@ -123,7 +123,7 @@
     resultDiv.style.display = 'block';
     resultDiv.textContent = 'Loading...';
 
-    db.ref("" + rollno).once("value").then(snapshot => {
+    db.ref(rollno).once("value").then(snapshot => {
       const student = snapshot.val();
       if (!student) {
         resultDiv.textContent = 'Student not found with this Roll No. (please re-enter correct Roll No.)';
@@ -133,26 +133,15 @@
       let resultHtml = `<p><strong>Name:</strong> ${student.name}</p>
                          <p><strong>Semester:</strong> ${student.sem}</p><hr>`;
 
-      const subjects = student.subjects || {};
-      for (const [sub, sec] of Object.entries(subjects)) {
-        resultHtml += `<p><span class="subject">${sub}:</span> Section ${sec}</p>`;
+      for (let i = 1; i <= 8; i++) {
+        const sub = student["sub" + i];
+        const sec = student["sec" + i];
+        if (sub && sec && sec !== "N/A") {
+          resultHtml += `<p><span class="subject">${sub}:</span> Section ${sec}</p>`;
+        }
       }
 
-      db.ref("StudentSubjectMapping").once("value").then(snapshot => {
-        const entries = snapshot.val();
-        const filtered = Object.values(entries).filter(entry => {
-          return entry.Class === student.sem && subjects[entry.Subject] === entry.Section;
-        });
-
-        if (filtered.length) {
-          resultHtml += "<hr><h3>Your Timetable</h3>";
-          filtered.forEach(entry => {
-            resultHtml += `<p>${entry.Subject} - ${entry.TimeSlot} - ${entry.Days} - ${entry.Teacher}</p>`;
-          });
-        }
-
-        resultDiv.innerHTML = resultHtml;
-      });
+      resultDiv.innerHTML = resultHtml;
     }).catch(err => {
       resultDiv.textContent = 'Error fetching data. Please try again later.';
       console.error(err);
